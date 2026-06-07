@@ -45,16 +45,49 @@ export default function StudentDashboard() {
     finally { setLoading(false); }
   };
 
-  const downloadCert = async (regId) => {
-    try {
-      const res = await certAPI.myByReg(regId);
-      const d   = res.data.data;
-     if (d?.certificateId) window.open(`${process.env.REACT_APP_API_BASE_URL}/api/v1/certificates/download/${d.certificateId}`, '_blank');
-      else setToast({ msg: 'Certificate not available yet', type: 'warning' });
-    } catch {
+ const downloadCert = async (regId) => {
+  try {
+    const res = await certAPI.myByReg(regId);
+    const d = res.data.data;
+
+    if (d?.certificateId) {
+
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/api/v1/certificates/download/${d.certificateId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Download failed");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `certificate-${d.certificateId}.pdf`;
+
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+
+    } else {
       setToast({ msg: 'Certificate not available yet', type: 'warning' });
     }
-  };
+
+  } catch {
+    setToast({ msg: 'Certificate not available yet', type: 'warning' });
+  }
+};
 
   const confirmedRegs = regs.filter(r => r.status === 'CONFIRMED');
 
