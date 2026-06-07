@@ -49,7 +49,7 @@ export default function StudentDashboard() {
     try {
       const res = await certAPI.myByReg(regId);
       const d   = res.data.data;
-      if (d?.certificatePath) window.open(`${process.env.REACT_APP_API_BASE_URL}/`, '_blank');
+     if (d?.certificateId) window.open(`${process.env.REACT_APP_API_BASE_URL}/api/v1/certificates/download/${d.certificateId}`, '_blank');
       else setToast({ msg: 'Certificate not available yet', type: 'warning' });
     } catch {
       setToast({ msg: 'Certificate not available yet', type: 'warning' });
